@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full Java DSA Tracker — 150 Items + Revision</title>
+<style>
+  :root {
+    --bg: #F5F4F0;
+    --card: #FFFFFF;
+    --border: #E2E0D8;
+    --border-strong: #C9C6BA;
+    --text: #2B2A26;
+    --text-mute: #79766C;
+    --accent: #1D6E56;
+    --accent-bg: #E1F0EA;
+    --accent-strong: #0F4A38;
+    --done-bg: #EEF6F1;
+    --weekend: #F1ECDD;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 80px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  header { margin-bottom: 20px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--text-mute); font-size: 14px; margin: 0; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 20px 0 24px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .stat .num { font-size: 22px; font-weight: 600; line-height: 1.1; }
+  .stat .lbl { font-size: 12px; color: var(--text-mute); margin-top: 4px; }
+
+  .progress-outer {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+  }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: var(--text-mute); }
+  .bar-track { height: 8px; background: #EAE8E0; border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s ease; }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+  }
+  button:hover { background: #F0EEE6; }
+  button.danger { color: #8C3B2E; border-color: #D9B7AD; }
+
+  .week {
+    margin-bottom: 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .week-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+    background: #FAF9F5;
+    border-bottom: 1px solid var(--border);
+  }
+  .week-head h2 { font-size: 14px; font-weight: 600; margin: 0; }
+  .week-progress { font-size: 12px; color: var(--text-mute); display: flex; align-items: center; gap: 8px; }
+  .week-progress .mini-track { width: 60px; height: 6px; background: #EAE8E0; border-radius: 999px; overflow: hidden; }
+  .week-progress .mini-fill { height: 100%; background: var(--accent); }
+  .chevron { transition: transform .2s ease; font-size: 12px; color: var(--text-mute); }
+  .week.collapsed .chevron { transform: rotate(-90deg); }
+  .week.collapsed .days { display: none; }
+
+  .days { padding: 4px 0; }
+  .day {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: start;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #F0EEE6;
+  }
+  .day:last-child { border-bottom: none; }
+  .day.weekend { background: var(--weekend); }
+  .day.done { background: var(--done-bg); }
+
+  .day-num { font-size: 12px; color: var(--text-mute); padding-top: 2px; }
+  .day-body { min-width: 0; }
+  .day-top-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .tag {
+    font-size: 10.5px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--accent-bg);
+    color: var(--accent-strong);
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .tag.weekend-tag { background: #EFE6C8; color: #6B551A; }
+  .tag.revision-tag { background: #F0E0EC; color: #6E2C56; }
+  .day.revision { border-left: 3px solid #A6447E; }
+  .item-list { margin: 0; padding: 0; list-style: none; }
+  .item-list li {
+    font-size: 13.5px;
+    line-height: 1.6;
+    padding-left: 14px;
+    position: relative;
+  }
+  .item-list li::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    color: var(--text-mute);
+  }
+  .day.done .item-list li { color: var(--text-mute); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+  .notes {
+    width: 100%;
+    margin-top: 6px;
+    font-size: 12.5px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #FCFBF8;
+    resize: vertical;
+    min-height: 30px;
+    color: var(--text);
+    font-family: inherit;
+  }
+  .notes::placeholder { color: #B7B4A9; }
+
+  .check {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border-strong);
+    background: var(--card);
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .check.checked { background: var(--accent); border-color: var(--accent); }
+  .check.checked::after {
+    content: "";
+    width: 5px;
+    height: 9px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(45deg);
+    margin-top: -2px;
+  }
+
+  footer { text-align: center; color: var(--text-mute); font-size: 12px; margin-top: 30px; }
+
+  @media (max-width: 480px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Full Java DSA tracker — 119 days, all 150 items + built-in revision</h1>
+    <p class="sub">Full 150-item curriculum, 119 days, with 19 built-in revision days (weekly recap + major-topic recap) so nothing gets forgotten.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="statDone">0</div><div class="lbl">days done</div></div>
+    <div class="stat"><div class="num" id="statLeft">119</div><div class="lbl">days left</div></div>
+    <div class="stat"><div class="num" id="statPct">0%</div><div class="lbl">complete</div></div>
+    <div class="stat"><div class="num" id="statStreak">0</div><div class="lbl">day streak</div></div>
+  </div>
+
+  <div class="progress-outer">
+    <div class="progress-label"><span>Overall progress</span><span id="progressText">0 / 119</span></div>
+    <div class="bar-track"><div class="bar-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="toolbar">
+    <button id="expandAll">Expand all weeks</button>
+    <button id="collapseAll">Collapse all weeks</button>
+    <button class="danger" id="resetAll">Reset progress</button>
+  </div>
+
+  <div id="weeksContainer"></div>
+
+  <footer>Progress is saved automatically in this browser. Prepared by Hargun Singh Suri</footer>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa_full_progress_v2_revision";
+
+const plan = [
+  { week: "Week 1", days: [
+    { d: 1, weekend: false, tag: "30 min", revision: false, items: ["1. Overview (Please Watch)", "2. Code Editor"] },
+    { d: 2, weekend: false, tag: "30 min", revision: false, items: ["3. Big O: Intro", "4. Big O: Worst Case", "5. Big O: O(n)", "Coding Exercise 1: Big O: O(n)"] },
+    { d: 3, weekend: false, tag: "30 min", revision: false, items: ["6. Big O: Drop Constants", "7. Big O: O(n^2)", "8. Big O: Drop Non-Dominants", "9. Big O: O(1)"] },
+    { d: 4, weekend: false, tag: "30 min", revision: false, items: ["10. Big O: O(log n)", "11. Big O: Different Terms for Inputs", "12. Big O: Array Lists", "13. Big O: Wrap Up", "Quiz 1: Big O"] },
+    { d: 5, weekend: false, tag: "30 min", revision: false, items: ["14. Classes", "15. References", "16. Linked List: Intro", "17. LL: Big O", "18. LL: Under the Hood"] },
+    { d: 6, weekend: true, tag: "60-90 min", revision: false, items: ["19. LL: Constructor", "20. Coding Exercises (Important)", "Coding Exercise 2: LL: Constructor", "21. LL: Print List", "22. LL: Append", "Coding Exercise 3: LL: Append"] },
+    { d: 7, weekend: true, tag: "60-90 min", revision: false, items: ["23. LL: Remove Last (Intro)", "24. LL: Remove Last (Code)", "Coding Exercise 4: LL: Remove Last"] },
+  ]},
+  { week: "Week 2", days: [
+    { d: 8, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — from memory, list LL Constructor, Append, Remove Last steps. Check against Day 5-7 notes after."] },
+    { d: 9, weekend: false, tag: "30 min", revision: false, items: ["25. LL: Prepend", "Coding Exercise 5: LL: Prepend"] },
+    { d: 10, weekend: false, tag: "30 min", revision: false, items: ["26. LL: Remove First", "Coding Exercise 6: LL: Remove First"] },
+    { d: 11, weekend: false, tag: "30 min", revision: false, items: ["27. LL: Get", "Coding Exercise 7: LL: Get"] },
+    { d: 12, weekend: false, tag: "30 min", revision: false, items: ["28. LL: Set", "Coding Exercise 8: LL: Set"] },
+    { d: 13, weekend: false, tag: "30 min", revision: false, items: ["29. LL: Insert", "Coding Exercise 9: LL: Insert"] },
+    { d: 14, weekend: true, tag: "60-90 min", revision: false, items: ["30. LL: Remove", "Coding Exercise 10: LL: Remove"] },
+  ]},
+  { week: "Week 3", days: [
+    { d: 15, weekend: true, tag: "60-90 min", revision: false, items: ["31. LL: Reverse", "Coding Exercise 11: LL: Reverse", "Quiz 2: Linked List Big O"] },
+    { d: 16, weekend: true, tag: "45-60 min", revision: true, items: ["MAJOR REVISION — Linked List core: re-solve Find Middle Node and Has Loop cold, no video. Time yourself."] },
+    { d: 17, weekend: false, tag: "45-60 min", revision: false, items: ["32. LL: Find Middle Node", "Coding Exercise 12: LL: Find Middle Node (Interview Question)"] },
+    { d: 18, weekend: false, tag: "45-60 min", revision: false, items: ["33. LL: Has Loop", "Coding Exercise 13: LL: Has Loop (Interview Question)"] },
+    { d: 19, weekend: false, tag: "30 min", revision: false, items: ["34. LL: Find Kth Node From End", "Coding Exercise 14: LL: Find Kth Node From End (Interview Question)"] },
+    { d: 20, weekend: false, tag: "45-60 min", revision: false, items: ["35. LL: Remove Duplicates", "Coding Exercise 15: LL: Remove Duplicates (Interview Question)"] },
+    { d: 21, weekend: false, tag: "45-60 min", revision: false, items: ["36. LL: Binary to Decimal", "Coding Exercise 16: LL: Binary to Decimal (Interview Question)"] },
+  ]},
+  { week: "Week 4", days: [
+    { d: 22, weekend: true, tag: "60-90 min", revision: false, items: ["37. LL: Partition List", "Coding Exercise 17: LL: Partition List (Interview Question)"] },
+    { d: 23, weekend: true, tag: "60-90 min", revision: false, items: ["38. LL: Reverse Between", "Coding Exercise 18: LL: Reverse Between (Interview Question)"] },
+    { d: 24, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — re-derive LL Partition List logic from memory before checking your old code."] },
+    { d: 25, weekend: false, tag: "45-60 min", revision: false, items: ["39. LL: Swap Nodes in Pairs", "Coding Exercise 19: LL: Swap Nodes in Pairs (Interview Question)"] },
+    { d: 26, weekend: false, tag: "45-60 min", revision: true, items: ["MAJOR REVISION — Linked List interview set: re-solve Remove Duplicates and Reverse Between cold, no hints."] },
+    { d: 27, weekend: false, tag: "30 min", revision: false, items: ["40. DLL: Constructor", "Coding Exercise 20: DLL: Constructor"] },
+    { d: 28, weekend: false, tag: "30 min", revision: false, items: ["41. DLL: Append", "Coding Exercise 21: DLL: Append"] },
+  ]},
+  { week: "Week 5", days: [
+    { d: 29, weekend: false, tag: "30 min", revision: false, items: ["42. DLL: Remove Last", "Coding Exercise 22: DLL: Remove Last"] },
+    { d: 30, weekend: false, tag: "30 min", revision: false, items: ["43. DLL: Prepend", "Coding Exercise 23: DLL: Prepend"] },
+    { d: 31, weekend: true, tag: "60-90 min", revision: false, items: ["44. DLL: Remove First", "Coding Exercise 24: DLL: Remove First", "45. DLL: Get", "Coding Exercise 25: DLL: Get"] },
+    { d: 32, weekend: true, tag: "60-90 min", revision: false, items: ["46. DLL: Set", "Coding Exercise 26: DLL: Set", "47. DLL: Insert", "Coding Exercise 27: DLL: Insert"] },
+    { d: 33, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — explain DLL vs LL tradeoffs out loud, then re-check Day 23-28 notes."] },
+    { d: 34, weekend: false, tag: "30 min", revision: false, items: ["48. DLL: Remove", "Coding Exercise 28: DLL: Remove"] },
+    { d: 35, weekend: false, tag: "45-60 min", revision: false, items: ["49. DLL: Palindrome Checker", "Coding Exercise 29: DLL: Palindrome Checker (Interview Question)"] },
+  ]},
+  { week: "Week 6", days: [
+    { d: 36, weekend: false, tag: "30 min", revision: false, items: ["50. DLL: Reverse", "Coding Exercise 30: DLL: Reverse (Interview Question)"] },
+    { d: 37, weekend: false, tag: "45-60 min", revision: false, items: ["51. DLL: Partition List", "Coding Exercise 31: DLL: Partition List (Interview Question)", "Coding Exercise 32: DLL: Reverse Between (Interview Question)", "Coding Exercise 33: DLL: Swap Nodes in Pairs (Interview Question)"] },
+    { d: 38, weekend: false, tag: "45-60 min", revision: true, items: ["MAJOR REVISION — DLL interview set: re-solve Palindrome Checker and Partition List cold."] },
+    { d: 39, weekend: true, tag: "60-90 min", revision: false, items: ["52. Stack: Intro", "53. Stack: Constructor", "54. Stack: Push", "55. Stack: Pop", "Coding Exercise 34: Stack: Constructor", "Coding Exercise 35: Stack: Push", "Coding Exercise 36: Stack: Pop"] },
+    { d: 40, weekend: true, tag: "60-90 min", revision: false, items: ["56. Queue: Intro", "57. Queue: Constructor", "58. Queue: Enqueue", "59. Queue: Dequeue", "Coding Exercise 37: Queue: Constructor", "Coding Exercise 38: Queue: Enqueue", "Coding Exercise 39: Queue: Dequeue", "Quiz 3: Stacks & Queues Big O"] },
+    { d: 41, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — write Stack Push/Pop and Queue Enqueue/Dequeue from memory, no video."] },
+    { d: 42, weekend: false, tag: "45-60 min", revision: false, items: ["Coding Exercise 40: Stack: Push for ArrayList (Interview Question)", "Coding Exercise 41: Stack: Pop for ArrayList (Interview Question)"] },
+  ]},
+  { week: "Week 7", days: [
+    { d: 43, weekend: false, tag: "30 min", revision: false, items: ["60. Stack: Reverse String", "Coding Exercise 42: Stack: Reverse String (Interview Question)"] },
+    { d: 44, weekend: false, tag: "45-60 min", revision: false, items: ["61. Stack: Parentheses Balanced", "Coding Exercise 43: Stack: Parentheses Balanced (Interview Question)"] },
+    { d: 45, weekend: false, tag: "45-60 min", revision: false, items: ["62. Stack: Sort Stack", "Coding Exercise 44: Stack: Sort Stack (Interview Question)"] },
+    { d: 46, weekend: false, tag: "45-60 min", revision: false, items: ["63. Queue Using Stacks", "Coding Exercise 45: Queue Using Stacks: Enqueue (Interview Question)", "Coding Exercise 46: Queue Using Stacks: Dequeue (Interview Question)"] },
+    { d: 47, weekend: false, tag: "45-60 min", revision: true, items: ["MAJOR REVISION — Stack/Queue interview set: re-solve Parentheses Balanced and Sort Stack cold."] },
+    { d: 48, weekend: true, tag: "60-90 min", revision: false, items: ["64. Trees: Intro & Terminology", "65. Binary Search Trees: Example", "66. BST: Big O"] },
+    { d: 49, weekend: true, tag: "60-90 min", revision: false, items: ["67. BST: Constructor", "Coding Exercise 47: BST: Constructor"] },
+  ]},
+  { week: "Week 8", days: [
+    { d: 50, weekend: false, tag: "45-60 min", revision: false, items: ["68. BST: Insert - Intro", "69. BST: Insert - Code", "Coding Exercise 48: BST: Insert"] },
+    { d: 51, weekend: false, tag: "45-60 min", revision: false, items: ["70. BST: Contains - Intro", "71. BST: Contains - Code", "Coding Exercise 49: BST: Contains", "Quiz 4: BST Big O"] },
+    { d: 52, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — draw a BST and manually trace Insert and Contains before checking notes."] },
+    { d: 53, weekend: false, tag: "15 min", revision: false, items: ["72. BST: Interview / LeetCode Exercises Location"] },
+    { d: 54, weekend: true, tag: "45-60 min", revision: true, items: ["MAJOR REVISION — full Trees/BST recap: re-solve BST Insert and BST Contains cold, no video."] },
+    { d: 55, weekend: false, tag: "30 min", revision: false, items: ["73. Hash Table: Intro", "74. HT: Collisions", "75. HT: Constructor"] },
+    { d: 56, weekend: false, tag: "45-60 min", revision: false, items: ["76. HT: Hash Method", "77. HT: Set", "78. HT: Get", "Coding Exercise 50: HT: Constructor", "Coding Exercise 51: HT: Set", "Coding Exercise 52: HT: Get"] },
+  ]},
+  { week: "Week 9", days: [
+    { d: 57, weekend: false, tag: "30 min", revision: false, items: ["79. HT: Keys", "80. HT: Big O", "Coding Exercise 53: HT: Keys"] },
+    { d: 58, weekend: true, tag: "60-90 min", revision: false, items: ["81. HT: Interview Question", "Quiz 5: Hash Table Big O", "Coding Exercise 54: HT: Item In Common (Interview Question)"] },
+    { d: 59, weekend: true, tag: "60-90 min", revision: false, items: ["82. HT: Find Duplicates", "Coding Exercise 55: HT: Find Duplicates (Interview Question)", "83. HT: First Non-Repeating Character", "Coding Exercise 56: HT: First Non-Repeating Character (Interview Question)"] },
+    { d: 60, weekend: false, tag: "45-60 min", revision: false, items: ["84. HT: Group Anagrams", "Coding Exercise 57: HT: Group Anagrams (Interview Question)"] },
+    { d: 61, weekend: false, tag: "45-60 min", revision: false, items: ["85. HT: Two Sum", "Coding Exercise 58: HT: Two Sum (Interview Question)"] },
+    { d: 62, weekend: false, tag: "45-60 min", revision: false, items: ["86. HT: Subarray Sum", "Coding Exercise 59: HT: Subarray Sum (Interview Question)"] },
+    { d: 63, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — explain how a Hash Table resolves collisions, then re-check Day 45-47 notes."] },
+  ]},
+  { week: "Week 10", days: [
+    { d: 64, weekend: false, tag: "45-60 min", revision: true, items: ["MAJOR REVISION — Hash Table interview set: re-solve Two Sum and Group Anagrams cold, no hints."] },
+    { d: 65, weekend: false, tag: "30 min", revision: false, items: ["87. Introduction to Sets", "88. Set: Remove Duplicates", "Coding Exercise 60: Set: Remove Duplicates (Interview Question)"] },
+    { d: 66, weekend: false, tag: "30 min", revision: false, items: ["89. Set: Has Unique Chars", "Coding Exercise 61: Set: Has Unique Chars (Interview Question)"] },
+    { d: 67, weekend: true, tag: "60-90 min", revision: false, items: ["90. Set: Find Pairs", "Coding Exercise 62: Set: Find Pairs (Interview Question)", "91. Set: Longest Consecutive Sequence", "Coding Exercise 63: Set: Longest Consecutive Sequence (Interview Question)"] },
+    { d: 68, weekend: true, tag: "60-90 min", revision: false, items: ["92. Graph: Intro", "93. Graph: Adjacency Matrix", "94. Graph: Adjacency List", "95. Graph: Big O"] },
+    { d: 69, weekend: false, tag: "30 min", revision: false, items: ["96. Graph: Add Vertex", "Coding Exercise 64: Graph: Add Vertex"] },
+    { d: 70, weekend: false, tag: "30 min", revision: false, items: ["97. Graph: Add Edge", "Coding Exercise 65: Graph: Add Edge"] },
+  ]},
+  { week: "Week 11", days: [
+    { d: 71, weekend: false, tag: "30 min", revision: false, items: ["98. Graph: Remove Edge", "Coding Exercise 66: Graph: Remove Edge"] },
+    { d: 72, weekend: false, tag: "30 min", revision: false, items: ["99. Graph: Remove Vertex", "Coding Exercise 67: Graph: Remove Vertex", "Quiz 6: Graph Big O"] },
+    { d: 73, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — re-derive Set: Find Pairs and Graph Add Vertex/Edge from memory."] },
+    { d: 74, weekend: true, tag: "60-90 min", revision: false, items: ["100. Heap: Intro", "101. Heap: Insert (Intro)", "102. Heap: Helper Methods"] },
+    { d: 75, weekend: true, tag: "60-90 min", revision: false, items: ["103. Heap: Insert (Code)", "Coding Exercise 68: Heap: Insert", "104. Heap: Remove"] },
+    { d: 76, weekend: false, tag: "45-60 min", revision: false, items: ["105. Heap: Sink Down", "Coding Exercise 69: Heap: Remove", "Coding Exercise 70: Heap: Sink Down"] },
+    { d: 77, weekend: false, tag: "30 min", revision: false, items: ["106. Heap: Priority Queues & Big O", "Coding Exercise 71: Heap: MinHeap Insert"] },
+  ]},
+  { week: "Week 12", days: [
+    { d: 78, weekend: false, tag: "30 min", revision: false, items: ["Coding Exercise 72: Heap: MinHeap Remove", "Coding Exercise 73: Heap: MinHeap Sink Down"] },
+    { d: 79, weekend: false, tag: "45-60 min", revision: false, items: ["Coding Exercise 74: Heap: Kth Smallest Element in an Array"] },
+    { d: 80, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — explain Heap Sink Down and MinHeap logic out loud before checking notes."] },
+    { d: 81, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 75: Heap: Maximum Element in a Stream", "107. Recursion: Intro", "108. Call Stack"] },
+    { d: 82, weekend: true, tag: "60-90 min", revision: false, items: ["109. Factorial", "110. rBST: Contains", "Coding Exercise 76: rBST: Contains"] },
+    { d: 83, weekend: false, tag: "30 min", revision: false, items: ["111. rBST: Insert", "Coding Exercise 77: rBST: Insert"] },
+    { d: 84, weekend: false, tag: "30 min", revision: false, items: ["112. rBST: Delete Intro", "113. rBST: Delete Code (1 of 3)"] },
+  ]},
+  { week: "Week 13", days: [
+    { d: 85, weekend: false, tag: "30 min", revision: false, items: ["114. rBST: Delete Code (2 of 3)", "115. rBST: Minimum Value", "Coding Exercise 78: BST: Minimum Value"] },
+    { d: 86, weekend: false, tag: "45-60 min", revision: false, items: ["116. rBST: Delete Code (3 of 3)", "Coding Exercise 79: rBST: Delete"] },
+    { d: 87, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 80: BST: Convert Sorted Array to Balanced BST (Interview Question)"] },
+    { d: 88, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 81: BST: Invert Binary Tree (Interview Question)", "117. Tree Traversal: Intro", "118. BFS (Breadth First Search): Intro"] },
+    { d: 89, weekend: false, tag: "30 min", revision: false, items: ["119. BFS: Code", "Coding Exercise 82: BST: Breadth First Search (BFS)"] },
+    { d: 90, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — re-derive rBST Insert and Delete steps from memory before checking Day 69-73 notes."] },
+    { d: 91, weekend: false, tag: "30 min", revision: false, items: ["120. DFS (Depth First Search): PreOrder - Intro", "121. DFS: PreOrder - Code", "Coding Exercise 83: BST: DFS PreOrder"] },
+  ]},
+  { week: "Week 14", days: [
+    { d: 92, weekend: false, tag: "30 min", revision: false, items: ["122. DFS: PostOrder - Intro", "123. DFS: PostOrder - Code", "Coding Exercise 84: BST: DFS PostOrder"] },
+    { d: 93, weekend: false, tag: "30 min", revision: false, items: ["124. DFS: InOrder - Intro", "125. DFS: InOrder - Code", "Coding Exercise 85: BST: DFS InOrder"] },
+    { d: 94, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 86: BST: Validate BST (Interview Question)"] },
+    { d: 95, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 87: BST: Kth Smallest Node (Interview Question)"] },
+    { d: 96, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — re-solve BST Validate BST and Kth Smallest Node cold, no video."] },
+    { d: 97, weekend: false, tag: "30 min", revision: false, items: ["126. Bubble Sort: Intro", "127. Bubble Sort: Code", "Coding Exercise 88: Bubble Sort"] },
+    { d: 98, weekend: false, tag: "30 min", revision: false, items: ["128. Selection Sort: Intro", "129. Selection Sort: Code", "Coding Exercise 89: Selection Sort"] },
+  ]},
+  { week: "Week 15", days: [
+    { d: 99, weekend: false, tag: "30 min", revision: false, items: ["130. Insertion Sort: Intro", "131. Insertion Sort: Code", "132. Insertion Sort: Big O", "Coding Exercise 90: Insertion Sort", "Quiz 7: Basic Sorts"] },
+    { d: 100, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 91: Bubble Sort of LL (Interview Question)"] },
+    { d: 101, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 92: Selection Sort of LL (Interview Question)", "Coding Exercise 93: Insertion Sort of LL (Interview Question)"] },
+    { d: 102, weekend: false, tag: "45-60 min", revision: true, items: ["MAJOR REVISION — full Sorting recap: re-derive Bubble, Selection, Insertion, Merge, Quick Sort logic from memory, one after another."] },
+    { d: 103, weekend: false, tag: "30 min", revision: false, items: ["133. Merge Sort: Overview", "134. Merge: Intro", "135. Merge: Code", "Coding Exercise 94: Merge"] },
+    { d: 104, weekend: false, tag: "30 min", revision: false, items: ["136. Merge Sort: Intro", "137. Merge Sort: Code", "Coding Exercise 95: Merge Sort"] },
+    { d: 105, weekend: false, tag: "30 min", revision: false, items: ["138. Merge Sort: Big O", "Coding Exercise 96: LL: Merge Two Sorted Lists (Interview Question)"] },
+  ]},
+  { week: "Week 16", days: [
+    { d: 106, weekend: true, tag: "60-90 min", revision: false, items: ["139. Quick Sort: Intro", "140. Pivot: Intro", "141. Pivot: Code", "Coding Exercise 97: Pivot"] },
+    { d: 107, weekend: true, tag: "60-90 min", revision: false, items: ["142. Quick Sort: Code", "143. Quick Sort: Big O", "Coding Exercise 98: Quick Sort"] },
+    { d: 108, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — explain Merge Sort vs Quick Sort tradeoffs (stability, time complexity) out loud."] },
+    { d: 109, weekend: false, tag: "30 min", revision: false, items: ["144. Overlapping Subproblems", "145. Optimized Substructure"] },
+    { d: 110, weekend: false, tag: "30 min", revision: false, items: ["146. Fibonacci Sequence"] },
+    { d: 111, weekend: false, tag: "30 min", revision: false, items: ["147. Memoization"] },
+    { d: 112, weekend: false, tag: "30 min", revision: false, items: ["148. Bottom Up"] },
+  ]},
+  { week: "Week 17", days: [
+    { d: 113, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 99: Array: Remove Element (Interview Question)", "Coding Exercise 100: Array: Find Max Min (Interview Question)"] },
+    { d: 114, weekend: true, tag: "60-90 min", revision: false, items: ["Coding Exercise 101: Array: Find Longest String (Interview Question)", "Coding Exercise 102: Array: Remove Duplicates (Interview Question)"] },
+    { d: 115, weekend: false, tag: "45-60 min", revision: false, items: ["Coding Exercise 103: Array: Max Profit (Interview Question)"] },
+    { d: 116, weekend: false, tag: "45-60 min", revision: false, items: ["Coding Exercise 104: Array: Rotate (Interview Question)"] },
+    { d: 117, weekend: false, tag: "45-60 min", revision: false, items: ["Coding Exercise 105: Array: Max Sub Array (Interview Question)"] },
+    { d: 118, weekend: true, tag: "15-20 min", revision: true, items: ["REVISION: Closed-book — re-solve two random Array interview exercises from earlier days, no hints."] },
+    { d: 119, weekend: false, tag: "15 min", revision: false, items: ["149. Coding Exercises Are Now After Each Section", "150. Thank You!", "Course complete — full recap pass recommended before interviews."] },
+  ]},
+];function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { checked: {}, notes: {}, collapsed: {} };
+  } catch (e) {
+    return { checked: {}, notes: {}, collapsed: {} };
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.error("Could not save progress", e);
+  }
+}
+
+let state = loadState();
+
+function totalDays() {
+  return plan.reduce((sum, w) => sum + w.days.length, 0);
+}
+
+function doneCount() {
+  return Object.values(state.checked).filter(Boolean).length;
+}
+
+function computeStreak() {
+  const all = plan.flatMap(w => w.days).sort((a, b) => a.d - b.d);
+  let streak = 0;
+  for (const day of all) {
+    if (state.checked[day.d]) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function updateStats() {
+  const total = totalDays();
+  const done = doneCount();
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById("statDone").textContent = done;
+  document.getElementById("statLeft").textContent = total - done;
+  document.getElementById("statPct").textContent = pct + "%";
+  document.getElementById("statStreak").textContent = computeStreak();
+  document.getElementById("progressText").textContent = done + " / " + total;
+  document.getElementById("progressFill").style.width = pct + "%";
+}
+
+function weekProgress(week) {
+  const done = week.days.filter(d => state.checked[d.d]).length;
+  return { done, total: week.days.length, pct: Math.round((done / week.days.length) * 100) };
+}
+
+function render() {
+  const container = document.getElementById("weeksContainer");
+  container.innerHTML = "";
+
+  plan.forEach((week, wi) => {
+    const wp = weekProgress(week);
+    const weekEl = document.createElement("div");
+    weekEl.className = "week" + (state.collapsed[wi] ? " collapsed" : "");
+
+    const head = document.createElement("div");
+    head.className = "week-head";
+    head.innerHTML =
+      '<h2>' + week.week + '</h2>' +
+      '<div class="week-progress">' +
+        '<span>' + wp.done + ' / ' + wp.total + '</span>' +
+        '<div class="mini-track"><div class="mini-fill" style="width:' + wp.pct + '%"></div></div>' +
+        '<span class="chevron">&#9660;</span>' +
+      '</div>';
+    head.addEventListener("click", () => {
+      state.collapsed[wi] = !state.collapsed[wi];
+      saveState();
+      render();
+    });
+    weekEl.appendChild(head);
+
+    const daysWrap = document.createElement("div");
+    daysWrap.className = "days";
+
+    week.days.forEach(day => {
+      const isDone = !!state.checked[day.d];
+      const dayEl = document.createElement("div");
+      dayEl.className = "day" + (day.weekend ? " weekend" : "") + (isDone ? " done" : "") + (day.revision ? " revision" : "");
+
+      const numEl = document.createElement("div");
+      numEl.className = "day-num";
+      numEl.textContent = "D" + day.d;
+
+      const bodyEl = document.createElement("div");
+      bodyEl.className = "day-body";
+
+      const topRow = document.createElement("div");
+      topRow.className = "day-top-row";
+      if (day.revision) {
+        const revEl = document.createElement("span");
+        revEl.className = "tag revision-tag";
+        revEl.textContent = "Revision";
+        topRow.appendChild(revEl);
+      }
+      const tagEl = document.createElement("span");
+      tagEl.className = "tag" + (day.weekend ? " weekend-tag" : "");
+      tagEl.textContent = day.tag;
+      topRow.appendChild(tagEl);
+      bodyEl.appendChild(topRow);
+
+      const listEl = document.createElement("ul");
+      listEl.className = "item-list";
+      day.items.forEach(itemText => {
+        const li = document.createElement("li");
+        li.textContent = itemText;
+        listEl.appendChild(li);
+      });
+      bodyEl.appendChild(listEl);
+
+      const notesEl = document.createElement("textarea");
+      notesEl.className = "notes";
+      notesEl.placeholder = "Notes for this day (optional)...";
+      notesEl.value = state.notes[day.d] || "";
+      notesEl.addEventListener("input", () => {
+        state.notes[day.d] = notesEl.value;
+        saveState();
+      });
+      bodyEl.appendChild(notesEl);
+
+      const checkEl = document.createElement("div");
+      checkEl.className = "check" + (isDone ? " checked" : "");
+      checkEl.addEventListener("click", () => {
+        state.checked[day.d] = !state.checked[day.d];
+        saveState();
+        render();
+        updateStats();
+      });
+
+      dayEl.appendChild(numEl);
+      dayEl.appendChild(bodyEl);
+      dayEl.appendChild(checkEl);
+      daysWrap.appendChild(dayEl);
+    });
+
+    weekEl.appendChild(daysWrap);
+    container.appendChild(weekEl);
+  });
+
+  updateStats();
+}
+
+document.getElementById("expandAll").addEventListener("click", () => {
+  plan.forEach((_, wi) => state.collapsed[wi] = false);
+  saveState();
+  render();
+});
+
+document.getElementById("collapseAll").addEventListener("click", () => {
+  plan.forEach((_, wi) => state.collapsed[wi] = true);
+  saveState();
+  render();
+});
+
+document.getElementById("resetAll").addEventListener("click", () => {
+  if (confirm("Reset all checked days and notes? This cannot be undone.")) {
+    state = { checked: {}, notes: {}, collapsed: {} };
+    saveState();
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
