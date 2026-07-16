@@ -1,4 +1,4 @@
-3. Big O: Intro
-4. Big O: Worst Case
-5. Big O: O(n)
-Coding Exercise 1: Big O: O(n)
+6. Big O: Drop Constants
+7. Big O: O(n^2)
+8. Big O: Drop Non-Dominants
+9. Big O: O(1)
