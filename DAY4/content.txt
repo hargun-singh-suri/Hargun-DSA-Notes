@@ -1,0 +1,5 @@
+10. Big O: O(log n)
+11. Big O: Different Terms for Inputs
+12. Big O: Array Lists
+13. Big O: Wrap Up
+Quiz 1: Big O
