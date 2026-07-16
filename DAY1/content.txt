@@ -1,0 +1,4 @@
+3. Big O: Intro
+4. Big O: Worst Case
+5. Big O: O(n)
+Coding Exercise 1: Big O: O(n)
