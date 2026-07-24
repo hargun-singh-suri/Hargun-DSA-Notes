@@ -138,4 +138,4 @@ Big O here is measured based on `n` = number of nodes in the list.
 1. **Conceptual/diagram view** — simple circles connected by arrows (easier to understand visually).
 2. **Under-the-hood view** — each node is really like a small object/hash map, and the "connections" are just reference pointers stored inside each node.
 
-**Key takeaway**: A linked list *looks* like a simple chain in diagrams, but internally it's built entirely using reference pointers (from the References concept) connecting node objects together.
+**Key takeaway**: A linked list *looks* like a simple chain in diagrams, but internally it's built entirely using reference pointers (from the References concept) connecting node objects together..
