@@ -121,7 +121,7 @@ These are simple "peek" methods used mainly for checking/debugging your list.
 ## 7. Append Method — Adding a Node to the End
 
 ### Goal:
-Add a new node to the **end** of the linked list.
+Add a new node to the **end** of the linked list..
 
 ### Steps:
 1. Create a new node using the value passed in.
