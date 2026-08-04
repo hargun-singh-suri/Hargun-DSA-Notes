@@ -1,0 +1,65 @@
+```markdown
+# LL: Find Middle Node (Interview Question)
+
+Implement `findMiddleNode()` to return the middle node of a linked list.
+If the list has an even number of nodes, return the **second** middle node.
+
+> Note: This `LinkedList` implementation has no `length` variable.
+
+## Method Signature
+```java
+public Node findMiddleNode()
+```
+
+## Example
+```java
+LinkedList myList = new LinkedList(1);
+myList.append(2);
+myList.append(3);
+myList.append(4);
+myList.append(5);
+
+Node middleNode = myList.findMiddleNode();
+System.out.println(middleNode.value); // Output: 3
+
+myList.append(6);
+middleNode = myList.findMiddleNode();
+System.out.println(middleNode.value); // Output: 4
+```
+
+- Odd length (`1->2->3->4->5`) → middle is `3`
+- Even length (`1->2->3->4->5->6`) → second middle is `4`
+
+## Approach: Floyd's Tortoise and Hare
+Use two pointers:
+- `slow` moves 1 step at a time
+- `fast` moves 2 steps at a time
+
+When `fast` reaches the end, `slow` is at the middle.
+
+### Pseudo Code
+```
+1. slow = head, fast = head
+2. while (fast != null && fast.next != null):
+     slow = slow.next
+     fast = fast.next.next
+3. return slow
+```
+
+### Java Code
+```java
+public Node findMiddleNode() {
+    // slow moves 1 step, fast moves 2 steps
+    Node slow = head;
+    Node fast = head;
+
+    while (fast != null && fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+
+    // slow is now at the middle node
+    return slow;
+}
+```
+```
